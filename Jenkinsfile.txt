@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t flask-cicd-app .'
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                sh 'docker rm -f flask-cicd-app || true'
+                sh 'docker run -d --name flask-cicd-app -p 8081:5000 flask-cicd-app'
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                sh 'sleep 5'
+                sh 'docker exec flask-cicd-app python -c "import urllib.request; print(urllib.request.urlopen(chr(104)+chr(116)+chr(116)+chr(112)+chr(58)+chr(47)+chr(47)+chr(49)+chr(50)+chr(55)+chr(46)+chr(48)+chr(46)+chr(48)+chr(46)+chr(49)+chr(58)+chr(53)+chr(48)+chr(48)+chr(48)).status)"'
+            }
+        }
+    }
+}
